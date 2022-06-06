@@ -2,6 +2,7 @@ use std::io;
 use std::io::Write;
 use std::str;
 mod reader;
+mod printer;
 use reader::types::MalType;
 
 fn main() {
@@ -26,20 +27,19 @@ fn main() {
 }
 
 fn rep(line: &str) {
-    print(eval(read(line)))
+    print(eval(&read(line)))
 }
 
 fn read(line: &str) -> MalType {
     let expr = reader::read_str(line);
-    println!("expression: {:?}", expr);
 
     expr
 }
 
-fn eval(expr: MalType) -> String {
-    format!("expression: {:?}", expr)
+fn eval(expr: &MalType) -> &MalType {
+    expr
 }
 
-fn print(line: String) {
-    println!("{}", line);
+fn print(expr: &MalType) {
+    println!("{}", printer::pr_str(expr));
 }

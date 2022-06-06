@@ -56,11 +56,9 @@ fn read_atom(reader: &Reader) -> MalType {
 fn read_list(reader: &mut Reader, mut list: MalType) -> MalType {
     match reader.peek() {
         Some(n) => {
-            if ")" == n  {
-                reader.next();
+            if ")" == n.trim()  {
                 list
             } else {
-                println!("current tok: {:?}", n);
                 list.push(read_form(reader));
                 reader.next();
 
@@ -78,7 +76,7 @@ fn read_list(reader: &mut Reader, mut list: MalType) -> MalType {
 fn read_form(reader: &mut Reader) -> MalType {
     match reader.peek() {
         Some(n) => {
-            if "(" == n  {
+            if "(" == n.trim()  {
                 reader.next();
                 let list = MalType::List { contents: vec!() };
 
