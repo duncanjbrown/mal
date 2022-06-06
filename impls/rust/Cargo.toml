@@ -2,7 +2,15 @@
 name = "rust2"
 version = "0.1.0"
 authors = ["root"]
+edition = "2021"
+
+[dependencies]
+regex = "1"
 
 [[bin]]
 name = "step0_repl"
 path = "step0_repl.rs"
+
+[[bin]]
+name = "step1_read_print"
+path = "step1_read_print.rs"

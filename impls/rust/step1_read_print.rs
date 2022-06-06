@@ -1,10 +1,11 @@
 use std::io;
 use std::io::Write;
 use std::str;
-
 mod reader;
+use reader::types::MalType;
 
 fn main() {
+    // reader::read_str
     loop {
         print!("user> ");
         io::stdout().flush().expect("Could not flush to stdout");
@@ -25,18 +26,20 @@ fn main() {
 }
 
 fn rep(line: &str) {
-    print(line);
-    // print(eval(read(line)))
+    print(eval(read(line)))
 }
 
-// fn read(line: &str) -> &str {
-//     reader::read_str(line)
-// }
-//
-// fn eval(line: &str) -> &str {
-//     line
-// }
-//
-fn print(line: &str) {
+fn read(line: &str) -> MalType {
+    let expr = reader::read_str(line);
+    println!("expression: {:?}", expr);
+
+    expr
+}
+
+fn eval(expr: MalType) -> String {
+    format!("expression: {:?}", expr)
+}
+
+fn print(line: String) {
     println!("{}", line);
 }
