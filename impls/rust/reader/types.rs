@@ -2,16 +2,8 @@
 pub enum MalType {
     List { contents: Vec<MalType> },
     Int(isize),
-    Symbol(MalSymbol),
+    Symbol(String),
     Null
-}
-
-#[derive(Debug)]
-pub enum MalSymbol {
-    Add,
-    Sub,
-    Mult,
-    Div,
 }
 
 impl MalType {

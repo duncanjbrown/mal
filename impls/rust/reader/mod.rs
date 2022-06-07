@@ -1,7 +1,6 @@
 use regex::Regex;
 pub mod types;
 use types::MalType;
-use types::MalSymbol;
 
 pub struct Reader {
     tokens: Vec<String>,
@@ -22,9 +21,14 @@ impl Reader {
 }
 
 fn tokenize(str: &str) -> Vec<String> {
-    let re = Regex::new(r#"[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]*)"#).unwrap();
+    let re = Regex::new(
+        r###"[\s,]*(~@|[\[\]{}()'`~^@]|"(?:\\.|[^\\"])*"?|;.*|[^\s\[\]{}('"`,;)]+)"###
+    ).unwrap();
 
-    let matches = re.find_iter(str).map(|c| c.as_str().to_string() ).collect();
+    let matches = re
+        .captures_iter(str.trim())
+        .map(|c| String::from(&c[1]))
+        .collect();
 
     matches
 }
@@ -36,14 +40,10 @@ fn read_atom(reader: &Reader) -> MalType {
             match intval {
                 Ok(int) => MalType::Int(int),
                 Err(e) => {
-                    match &token[..] {
-                        "+" => MalType::Symbol(MalSymbol::Add),
-                        "-" => MalType::Symbol(MalSymbol::Sub),
-                        "*" => MalType::Symbol(MalSymbol::Mult),
-                        "/" => MalType::Symbol(MalSymbol::Div),
+                    match &token.trim()[..] {
+                        "nil" => MalType::Null,
                         _ => {
-                            println!("err: {:?}", e);
-                            panic!()
+                            MalType::Symbol(token)
                         }
                     }
                 }
