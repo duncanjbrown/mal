@@ -36,38 +36,56 @@ fn tokenize(str: &str) -> Vec<String> {
 fn read_atom(reader: &Reader) -> MalType {
     match reader.peek() {
         Some(token) => {
-            let intval = token.trim().parse::<isize>();
-            match intval {
-                Ok(int) => MalType::Int(int),
-                Err(e) => {
-                    match &token.trim()[..] {
-                        "nil" => MalType::Null,
-                        _ => {
-                            MalType::Symbol(token)
-                        }
-                    }
-                }
-            }
+            parse_token(token)
         }
         None => MalType::Null
     }
 }
 
-fn read_list(reader: &mut Reader, mut list: MalType) -> MalType {
+fn parse_token(token: String) -> MalType {
+    if token == "nil" {
+        return MalType::Null;
+    }
+
+    if token == "true" {
+        return MalType::True;
+    }
+
+    if token == "false" {
+        return MalType::False;
+    }
+
+    let intval = token.parse::<isize>();
+    if intval.is_ok() {
+        return MalType::Int(intval.unwrap());
+    }
+
+    if token.starts_with("\"") {
+        if token.len() > 1 && token.ends_with("\"") {
+            let string_literal = &token[1..token.len() - 1];
+            return MalType::String(string_literal.to_string());
+        } else {
+            MalType::ParseError("EOF when reading string".to_string())
+        }
+    } else {
+        MalType::Symbol(token)
+    }
+}
+
+fn read_list(reader: &mut Reader, bound: &str, mut list: MalType) -> Result<MalType, &'static str> {
     match reader.peek() {
-        Some(n) => {
-            if ")" == n.trim()  {
-                list
+        Some(token) => {
+            if bound == token.trim()  {
+                Ok(list)
             } else {
                 list.push(read_form(reader));
                 reader.next();
 
-                read_list(reader, list)
+                read_list(reader, bound, list)
             }
         },
         None => {
-            println!("ERRRORRRR");
-            list
+            Err("EOF when reading list")
         }
     }
 }
@@ -75,12 +93,32 @@ fn read_list(reader: &mut Reader, mut list: MalType) -> MalType {
 
 fn read_form(reader: &mut Reader) -> MalType {
     match reader.peek() {
-        Some(n) => {
-            if "(" == n.trim()  {
+        Some(token) => {
+            let tok = token.trim();
+            if "(" == tok {
                 reader.next();
                 let list = MalType::List { contents: vec!() };
 
-                read_list(reader, list)
+                match read_list(reader, ")", list) {
+                    Ok(list) => list,
+                    Err(error) => MalType::ParseError(error.to_string())
+                }
+            } else if "[" == tok {
+                reader.next();
+                let list = MalType::Vector { contents: vec!() };
+
+                match read_list(reader, "]", list) {
+                    Ok(list) => list,
+                    Err(error) => MalType::ParseError(error.to_string())
+                }
+            } else if "{" == tok {
+                reader.next();
+                let list = MalType::HashMap { contents: vec!() };
+
+                match read_list(reader, "}", list) {
+                    Ok(list) => list,
+                    Err(error) => MalType::ParseError(error.to_string())
+                }
             } else {
                 read_atom(&reader)
             }

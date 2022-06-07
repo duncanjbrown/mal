@@ -6,7 +6,6 @@ mod printer;
 use reader::types::MalType;
 
 fn main() {
-    // reader::read_str
     loop {
         print!("user> ");
         io::stdout().flush().expect("Could not flush to stdout");
@@ -18,7 +17,7 @@ fn main() {
                 if n == 0 {
                     break;
                 } else {
-                    rep(&input.trim_end());
+                    rep(&input.trim());
                 }
             }
             Err(error) => println!("Input error! {}", error),
@@ -31,7 +30,7 @@ fn rep(line: &str) {
 }
 
 fn read(line: &str) -> MalType {
-    let expr = reader::read_str(&line);
+    let expr = reader::read_str(line);
 
     expr
 }
