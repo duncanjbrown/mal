@@ -1,4 +1,5 @@
 #[derive(Debug)]
+#[derive(Clone)]
 pub enum MalType {
     List { contents: Vec<MalType> },
     Vector { contents: Vec<MalType> },
