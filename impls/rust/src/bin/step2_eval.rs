@@ -1,9 +1,10 @@
 use std::io;
 use std::io::Write;
 use std::str;
-mod reader;
-mod printer;
-use reader::types::MalType;
+use mal;
+use mal::types::MalType;
+use mal::reader::read_str;
+use mal::printer::pr_str;
 
 fn main() {
     loop {
@@ -17,7 +18,7 @@ fn main() {
                 if n == 0 {
                     break;
                 } else {
-                    rep(&input.trim());
+                    rep(&input.trim_end());
                 }
             }
             Err(error) => println!("Input error! {}", error),
@@ -30,7 +31,7 @@ fn rep(line: &str) {
 }
 
 fn read(line: &str) -> MalType {
-    let expr = reader::read_str(line);
+    let expr = read_str(&line);
 
     expr
 }
@@ -40,5 +41,5 @@ fn eval(expr: &MalType) -> &MalType {
 }
 
 fn print(expr: &MalType) {
-    println!("{}", printer::pr_str(expr));
+    println!("{}", pr_str(expr));
 }

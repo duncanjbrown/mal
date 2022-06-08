@@ -1,4 +1,4 @@
-use crate::reader::types::MalType;
+use crate::types::MalType;
 
 pub fn pr_str(expr: &MalType) -> String {
     match expr {

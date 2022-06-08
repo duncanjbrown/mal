@@ -1,6 +1,5 @@
 use regex::Regex;
-pub mod types;
-use types::MalType;
+use crate::types::MalType;
 
 pub struct Reader {
     tokens: Vec<String>,
