@@ -9,13 +9,13 @@ dist: mal
 mal: stepA_mal
 	cp $< $@
 
-%: %.rs
-	cargo build --release --bin $*
-	cp target/release/$* $@
+%: src/bin/%.rs
+	cargo build --bin $*
+	cp target/debug/$* $@
 
 STEP0_DEPS = Cargo.toml
-STEP1_DEPS = $(STEP0_DEPS)
-STEP3_DEPS = $(STEP1_DEPS) env.rs
+STEP1_DEPS = $(STEP0_DEPS) src/reader.rs src/types.rs src/printer.rs src/lib.rs
+STEP3_DEPS = $(STEP1_DEPS)
 STEP4_DEPS = $(STEP3_DEPS) core.rs
 
 step0_repl: $(STEP0_DEPS)

@@ -3,7 +3,7 @@ name = "rust2"
 version = "0.1.0"
 authors = ["root"]
 edition = "2021"
-default-run = "step2_eval"
+default-run = "step3_env"
 
 [dependencies]
 regex = "1"

@@ -5,6 +5,7 @@ pub enum MalType {
     Vector { contents: Vec<MalType> },
     HashMap { contents: Vec<MalType> },
     Int(isize),
+    Function(fn(Vec<MalType>) -> MalType),
     Symbol(String),
     String(String),
     True,

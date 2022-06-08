@@ -5,6 +5,7 @@ pub fn pr_str(expr: &MalType) -> String {
         MalType::Int(value) => format!("{}", value),
         MalType::Symbol(s) => format!("{}", s),
         MalType::String(s) => format!("\"{}\"", s),
+        MalType::Function(_) => format!("<# Function>"),
         MalType::True => format!("true"),
         MalType::False => format!("false"),
         MalType::Null => "nil".to_string(),
