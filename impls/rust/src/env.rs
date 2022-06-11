@@ -2,11 +2,24 @@ use crate::types::MalType;
 use std::collections::HashMap;
 
 pub struct Env<'a> {
-    outer: Option<&'a Env<'a>>,
+    pub outer: Option<&'a Env<'a>>,
     symbols: HashMap<String, MalType>
 }
 
-impl Env<'_> {
+impl<'a> Env<'a> {
+    pub fn new(outer: Option<&'a Env>) -> Self {
+        let symbols: HashMap<String, MalType> = HashMap::new();
+
+        match outer {
+            Some(new_outer) => Self { outer: Some(new_outer), symbols: symbols },
+            None => Self { outer: None, symbols: symbols }
+        }
+    }
+
+    pub fn set_outer(&mut self, env: &'a Env) {
+        self.outer = Some(env)
+    }
+
     pub fn call(&self, symbol: &str, args: Vec<MalType>) -> MalType {
         match self.symbols.get(symbol) {
             Some(MalType::Function(f)) => f(args),
@@ -24,10 +37,8 @@ impl Env<'_> {
         }
     }
 
-    pub fn set(mut self, symbol: String, value: MalType) -> Self {
+    pub fn set(&mut self, symbol: String, value: MalType) {
         self.symbols.insert(symbol, value);
-
-        self
     }
 
     pub fn find(&self, symbol: &str) -> Option<&Self> {
@@ -43,63 +54,3 @@ impl Env<'_> {
     }
 }
 
-fn add(args: Vec<MalType>) -> MalType {
-    MalType::Int(args.iter().fold(0, |acc, next|
-        match next {
-            MalType::Int(a) => acc + a,
-            _ => panic!("Can't add non-integer {:?}", next)
-        }
-    ))
-}
-
-fn mult(args: Vec<MalType>) -> MalType {
-    MalType::Int(args.iter().fold(1, |acc, next|
-        match next {
-            MalType::Int(a) => acc * a,
-            _ => panic!("Can't multiply non-integer {:?}", next)
-        }
-    ))
-}
-
-fn div(args: Vec<MalType>) -> MalType {
-    match args.get(0) {
-        Some(MalType::Int(arg1)) => {
-            MalType::Int(
-                args[1..].iter().fold(*arg1, |acc, next|
-                match next {
-                    MalType::Int(a) => acc / a,
-                    _ => panic!("Can't divide non-integer {:?}", next)
-                }
-            ))
-        },
-        Some(x) => panic!("Can’t divide non-integer {:?}", x),
-        None => panic!("Wrong number of args passed to \"/\"")
-    }
-}
-
-fn sub(args: Vec<MalType>) -> MalType {
-    match args.get(0) {
-        Some(MalType::Int(arg1)) => {
-            MalType::Int(
-                args[1..].iter().fold(*arg1, |acc, next|
-                match next {
-                    MalType::Int(a) => acc - a,
-                    _ => panic!("Can't subtract non-integer {:?}", next)
-                }
-            ))
-        },
-        Some(x) => panic!("Can’t subtract non-integer {:?}", x),
-        None => panic!("Wrong number of args passed to \"-\"")
-    }
-}
-
-pub fn repl_env() -> Env<'static> {
-    let mut symbols: HashMap<String, MalType> = HashMap::new();
-
-    symbols.insert("+".to_string(), MalType::Function(add));
-    symbols.insert("-".to_string(), MalType::Function(sub));
-    symbols.insert("*".to_string(), MalType::Function(mult));
-    symbols.insert("/".to_string(), MalType::Function(div));
-
-    Env { symbols: symbols, outer: None }
-}

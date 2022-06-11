@@ -4,7 +4,6 @@ use std::str;
 
 use mal::types::MalType;
 use mal::env::Env;
-use mal::env::repl_env;
 use mal::reader::read_str;
 use mal::printer::pr_str;
 
@@ -55,7 +54,70 @@ fn eval_ast(ast: MalType, env: &Env) -> MalType {
     }
 }
 
+fn add(args: Vec<MalType>) -> MalType {
+    MalType::Int(args.iter().fold(0, |acc, next|
+        match next {
+            MalType::Int(a) => acc + a,
+            _ => panic!("Can't add non-integer {:?}", next)
+        }
+    ))
+}
+
+fn mult(args: Vec<MalType>) -> MalType {
+    MalType::Int(args.iter().fold(1, |acc, next|
+        match next {
+            MalType::Int(a) => acc * a,
+            _ => panic!("Can't multiply non-integer {:?}", next)
+        }
+    ))
+}
+
+fn div(args: Vec<MalType>) -> MalType {
+    match args.get(0) {
+        Some(MalType::Int(arg1)) => {
+            MalType::Int(
+                args[1..].iter().fold(*arg1, |acc, next|
+                match next {
+                    MalType::Int(a) => acc / a,
+                    _ => panic!("Can't divide non-integer {:?}", next)
+                }
+            ))
+        },
+        Some(x) => panic!("Can’t divide non-integer {:?}", x),
+        None => panic!("Wrong number of args passed to \"/\"")
+    }
+}
+
+fn sub(args: Vec<MalType>) -> MalType {
+    match args.get(0) {
+        Some(MalType::Int(arg1)) => {
+            MalType::Int(
+                args[1..].iter().fold(*arg1, |acc, next|
+                match next {
+                    MalType::Int(a) => acc - a,
+                    _ => panic!("Can't subtract non-integer {:?}", next)
+                }
+            ))
+        },
+        Some(x) => panic!("Can’t subtract non-integer {:?}", x),
+        None => panic!("Wrong number of args passed to \"-\"")
+    }
+}
+
+pub fn repl_env() -> Env<'static> {
+    let mut env = Env::new(None);
+
+    env.set("+".to_string(), MalType::Function(add));
+    env.set("-".to_string(), MalType::Function(sub));
+    env.set("*".to_string(), MalType::Function(mult));
+    env.set("/".to_string(), MalType::Function(div));
+
+    env
+}
+
 fn main() {
+    let repl_env = repl_env();
+
     loop {
         print!("user> ");
         io::stdout().flush().expect("Could not flush to stdout");
@@ -67,7 +129,7 @@ fn main() {
                 if n == 0 {
                     break;
                 } else {
-                    rep(&input.trim_end());
+                    rep(input.trim_end(), &repl_env);
                 }
             }
             Err(error) => println!("Input error! {}", error),
@@ -75,8 +137,8 @@ fn main() {
     }
 }
 
-fn rep(line: &str) {
-    print(&eval(read(line)))
+fn rep(line: &str, env: &Env) {
+    print(&eval(read(line), env))
 }
 
 fn read(line: &str) -> MalType {
@@ -85,8 +147,8 @@ fn read(line: &str) -> MalType {
     expr
 }
 
-fn eval(expr: MalType) -> MalType {
-    eval_ast(expr, &repl_env())
+fn eval(expr: MalType, env: &Env) -> MalType {
+    eval_ast(expr, &env)
 }
 
 fn print(expr: &MalType) {
