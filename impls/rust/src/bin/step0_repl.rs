@@ -2,8 +2,6 @@ use std::io;
 use std::io::Write;
 use std::str;
 
-mod reader;
-
 fn main() {
     loop {
         print!("user> ");

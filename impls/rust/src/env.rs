@@ -12,8 +12,8 @@ impl<'a> Env<'a> {
         let symbols: HashMap<String, MalType> = HashMap::new();
 
         match outer {
-            Some(new_outer) => Self { outer: Some(new_outer), symbols: symbols },
-            None => Self { outer: None, symbols: symbols }
+            Some(new_outer) => Self { outer: Some(new_outer), symbols },
+            None => Self { outer: None, symbols }
         }
     }
 
@@ -21,7 +21,7 @@ impl<'a> Env<'a> {
         match self.find(symbol) {
             Some(env) => {
                 let val = env.symbols.get(symbol);
-                Some(&val.unwrap())
+                Some(val.unwrap())
             },
             None => None
         }
@@ -33,7 +33,7 @@ impl<'a> Env<'a> {
 
     pub fn find(&self, symbol: &str) -> Option<&Self> {
         match &self.symbols.get(symbol) {
-            Some(_) => Some(&self),
+            Some(_) => Some(self),
             None => {
                 match &self.outer {
                     Some(env) => env.find(symbol),

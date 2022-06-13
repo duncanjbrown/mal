@@ -7,7 +7,7 @@ use mal::env::Env;
 use mal::reader::read_str;
 use mal::printer::pr_str;
 
-fn eval_ast<'a>(ast: MalType, env: &'a mut Env) -> MalType {
+fn eval_ast(ast: MalType, env: &mut Env) -> MalType {
     match ast {
         MalType::Vector { contents } => {
             match contents.len() {
@@ -166,9 +166,7 @@ fn rep(line: &str, env: &mut Env) {
 }
 
 fn read(line: &str) -> MalType {
-    let expr = read_str(line);
-
-    expr
+    read_str(line)
 }
 
 fn eval(expr: MalType, env: &mut Env) -> MalType {

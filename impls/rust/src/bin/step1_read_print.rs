@@ -1,9 +1,10 @@
 use std::io;
 use std::io::Write;
 use std::str;
-mod reader;
-mod printer;
-use reader::types::MalType;
+
+use mal::reader;
+use mal::printer;
+use mal::types::MalType;
 
 fn main() {
     // reader::read_str
