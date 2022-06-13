@@ -1,6 +1,7 @@
 use crate::types::MalType;
 use std::collections::HashMap;
 
+#[derive(Debug)]
 pub struct Env<'a> {
     pub outer: Option<&'a Env<'a>>,
     symbols: HashMap<String, MalType>
@@ -16,22 +17,11 @@ impl<'a> Env<'a> {
         }
     }
 
-    pub fn set_outer(&mut self, env: &'a Env) {
-        self.outer = Some(env)
-    }
-
-    pub fn call(&self, symbol: &str, args: Vec<MalType>) -> MalType {
-        match self.symbols.get(symbol) {
-            Some(MalType::Function(f)) => f(args),
-            _ => MalType::ParseError(format!("Cannot call {} as a function", symbol))
-        }
-    }
-
     pub fn get(&self, symbol: &str) -> Option<&MalType> {
         match self.find(symbol) {
             Some(env) => {
-                let val = env.symbols.get(symbol).unwrap();
-                Some(val)
+                let val = env.symbols.get(symbol);
+                Some(&val.unwrap())
             },
             None => None
         }

@@ -7,7 +7,7 @@ use mal::env::Env;
 use mal::reader::read_str;
 use mal::printer::pr_str;
 
-fn eval_ast(ast: MalType, env: &Env) -> MalType {
+fn eval_ast<'a>(ast: MalType, env: &'a mut Env) -> MalType {
     match ast {
         MalType::Vector { contents } => {
             match contents.len() {
@@ -27,6 +27,12 @@ fn eval_ast(ast: MalType, env: &Env) -> MalType {
                 }
             }
         },
+        MalType::Symbol(sym) => {
+            match env.get(&sym) {
+                Some(n) => n.clone(),
+                None => MalType::Symbol(sym)
+            }
+        },
         MalType::List { contents } => {
             match contents.get(0) {
                 Some(f) => {
@@ -36,8 +42,12 @@ fn eval_ast(ast: MalType, env: &Env) -> MalType {
                     match f {
                         MalType::Symbol(sym) => {
                             match env.get(sym) {
-                                Some(MalType::Function(f)) => f(evaluated_args.to_vec()),
-                                _ => MalType::ParseError("i don't understand!".to_string())
+                                Some(MalType::BuiltIn(f)) => f(env, args.to_vec()),
+                                Some(MalType::Function(f)) => {
+                                    f(evaluated_args.to_vec())
+                                }
+                                None => MalType::ParseError("i don't understand!".to_string()),
+                                value => value.unwrap().clone()
                             }
                         },
                         MalType::String(val) => { MalType::ParseError(format!("Cannot call {} as a function", val)) },
@@ -104,6 +114,18 @@ fn sub(args: Vec<MalType>) -> MalType {
     }
 }
 
+fn def(env: &mut Env, args: Vec<MalType>) -> MalType {
+    match &args[..] {
+        [MalType::Symbol(sym), n] => {
+            let new_val = eval_ast(n.clone(), env);
+            env.set(sym.clone(), new_val.clone());
+
+            new_val
+        },
+        _ => MalType::ParseError("Could not def".to_string())
+    }
+}
+
 pub fn repl_env() -> Env<'static> {
     let mut env = Env::new(None);
 
@@ -112,11 +134,13 @@ pub fn repl_env() -> Env<'static> {
     env.set("*".to_string(), MalType::Function(mult));
     env.set("/".to_string(), MalType::Function(div));
 
+    env.set("def!".to_string(), MalType::BuiltIn(def));
+
     env
 }
 
 fn main() {
-    let repl_env = repl_env();
+    let mut repl_env = repl_env();
 
     loop {
         print!("user> ");
@@ -129,7 +153,7 @@ fn main() {
                 if n == 0 {
                     break;
                 } else {
-                    rep(input.trim_end(), &repl_env);
+                    rep(input.trim_end(), &mut repl_env);
                 }
             }
             Err(error) => println!("Input error! {}", error),
@@ -137,18 +161,18 @@ fn main() {
     }
 }
 
-fn rep(line: &str, env: &Env) {
+fn rep(line: &str, env: &mut Env) {
     print(&eval(read(line), env))
 }
 
 fn read(line: &str) -> MalType {
-    let expr = read_str(&line);
+    let expr = read_str(line);
 
     expr
 }
 
-fn eval(expr: MalType, env: &Env) -> MalType {
-    eval_ast(expr, &env)
+fn eval(expr: MalType, env: &mut Env) -> MalType {
+    eval_ast(expr, env)
 }
 
 fn print(expr: &MalType) {
