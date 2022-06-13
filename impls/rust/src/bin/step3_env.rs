@@ -37,16 +37,17 @@ fn eval_ast(ast: MalType, env: &mut Env) -> MalType {
             match contents.get(0) {
                 Some(f) => {
                     let args = &contents[1..];
-                    let evaluated_args: Vec<MalType> = args.iter().map(|item| eval_ast(item.clone(), env)).collect();
 
                     match f {
                         MalType::Symbol(sym) => {
                             match env.get(sym) {
                                 Some(MalType::BuiltIn(f)) => f(env, args.to_vec()),
                                 Some(MalType::Function(f)) => {
-                                    f(evaluated_args.to_vec())
+                                    let func = *f;
+                                    let evaluated_args: Vec<MalType> = args.iter().map(|item| eval_ast(item.clone(), env)).collect();
+                                    func(evaluated_args.to_vec())
                                 }
-                                None => MalType::ParseError("i don't understand!".to_string()),
+                                None => MalType::ParseError(format!("{} not found", sym)),
                                 value => value.unwrap().clone()
                             }
                         },
@@ -116,13 +117,49 @@ fn sub(args: Vec<MalType>) -> MalType {
 
 fn def(env: &mut Env, args: Vec<MalType>) -> MalType {
     match &args[..] {
-        [MalType::Symbol(sym), n] => {
-            let new_val = eval_ast(n.clone(), env);
-            env.set(sym.clone(), new_val.clone());
-
-            new_val
+        [MalType::Symbol(sym), ast] => {
+            set_value(env, sym, ast.clone())
         },
         _ => MalType::ParseError("Could not def".to_string())
+    }
+}
+
+fn set_value(env: &mut Env, symbol: &str, ast: MalType) -> MalType {
+    let new_val = eval_ast(ast, env);
+    match new_val {
+        MalType::ParseError(_) => { new_val },
+        _ => {
+            env.set(symbol.to_string(), new_val.clone());
+            new_val
+        }
+    }
+}
+
+fn mal_let(env: &mut Env, args: Vec<MalType>) -> MalType {
+    match &args[..] {
+        [MalType::List { contents: bindings } | MalType::Vector { contents: bindings }, ast] => {
+            if bindings.len() % 2 != 0 {
+                MalType::ParseError("Uneven number of forms passed to let".to_string())
+            } else {
+                let mut new_env = Env::new(Some(env));
+                let iter = bindings.chunks(2);
+
+                let bound_env: &mut Env = iter.fold(&mut new_env, |e, chunk|
+                        match chunk {
+                            [MalType::Symbol(sym), let_expr] => {
+                                set_value(e, sym, let_expr.clone());
+                                e
+                            },
+                            _ => {
+                                panic!("Can't let");
+                            }
+                        }
+                );
+
+                eval_ast(ast.clone(), bound_env)
+            }
+        }
+        _ => MalType::ParseError("Could not let".to_string())
     }
 }
 
@@ -135,6 +172,7 @@ pub fn repl_env() -> Env<'static> {
     env.set("/".to_string(), MalType::Function(div));
 
     env.set("def!".to_string(), MalType::BuiltIn(def));
+    env.set("let*".to_string(), MalType::BuiltIn(mal_let));
 
     env
 }
