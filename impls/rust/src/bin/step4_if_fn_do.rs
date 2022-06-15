@@ -169,6 +169,22 @@ fn mal_do(env: &mut Env, args: Vec<MalType>) -> MalType {
     )
 }
 
+fn mal_if(env: &mut Env, args: Vec<MalType>) -> MalType {
+    if args.len() == 2 {
+        match eval_ast(args.get(0).unwrap().clone(), env) {
+            MalType::False | MalType::Null => MalType::Null,
+            _ => eval_ast(args.get(1).unwrap().clone(), env)
+        }
+    } else if args.len() == 3 {
+        match eval_ast(args.get(0).unwrap().clone(), env) {
+            MalType::False | MalType::Null => eval_ast(args.get(2).unwrap().clone(), env),
+            _ => eval_ast(args.get(1).unwrap().clone(), env)
+        }
+    } else {
+        MalType::ParseError("Wrong number of forms passed to if".to_string())
+    }
+}
+
 pub fn repl_env() -> Env<'static> {
     let mut env = Env::new(None);
 
@@ -180,6 +196,7 @@ pub fn repl_env() -> Env<'static> {
     env.set("def!".to_string(), MalType::BuiltIn(def));
     env.set("let*".to_string(), MalType::BuiltIn(mal_let));
     env.set("do".to_string(), MalType::BuiltIn(mal_do));
+    env.set("if".to_string(), MalType::BuiltIn(mal_if));
 
     env
 }
