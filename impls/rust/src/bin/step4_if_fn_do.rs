@@ -129,7 +129,7 @@ fn set_value(env: &mut Env, symbol: &str, ast: MalType) -> MalType {
     match new_val {
         MalType::ParseError(_) => { new_val },
         _ => {
-            env.set(symbol.to_string(), new_val.clone());
+            env.set(symbol, new_val.clone());
             new_val
         }
     }
@@ -188,15 +188,15 @@ fn mal_if(env: &mut Env, args: Vec<MalType>) -> MalType {
 pub fn repl_env() -> Env<'static> {
     let mut env = Env::new(None);
 
-    env.set("+".to_string(), MalType::Function(add));
-    env.set("-".to_string(), MalType::Function(sub));
-    env.set("*".to_string(), MalType::Function(mult));
-    env.set("/".to_string(), MalType::Function(div));
+    env.set("+", MalType::Function(add));
+    env.set("-", MalType::Function(sub));
+    env.set("*", MalType::Function(mult));
+    env.set("/", MalType::Function(div));
 
-    env.set("def!".to_string(), MalType::BuiltIn(def));
-    env.set("let*".to_string(), MalType::BuiltIn(mal_let));
-    env.set("do".to_string(), MalType::BuiltIn(mal_do));
-    env.set("if".to_string(), MalType::BuiltIn(mal_if));
+    env.set("def!", MalType::BuiltIn(def));
+    env.set("let*", MalType::BuiltIn(mal_let));
+    env.set("do", MalType::BuiltIn(mal_do));
+    env.set("if", MalType::BuiltIn(mal_if));
 
     env
 }

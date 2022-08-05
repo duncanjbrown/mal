@@ -27,8 +27,8 @@ impl<'a> Env<'a> {
         }
     }
 
-    pub fn set(&mut self, symbol: String, value: MalType) {
-        self.symbols.insert(symbol, value);
+    pub fn set(&mut self, symbol: &str, value: MalType) {
+        self.symbols.insert(symbol.to_owned(), value);
     }
 
     pub fn find(&self, symbol: &str) -> Option<&Self> {
