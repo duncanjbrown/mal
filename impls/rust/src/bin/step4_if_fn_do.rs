@@ -164,7 +164,7 @@ fn mal_let(env: &mut Env, args: Vec<MalType>) -> MalType {
 }
 
 fn mal_do(env: &mut Env, args: Vec<MalType>) -> MalType {
-    args.into_iter().fold(MalType::Null, |_ret, arg|
+    args.into_iter().fold(MalType::Nil, |_ret, arg|
         eval_ast(arg, env)
     )
 }
@@ -172,12 +172,12 @@ fn mal_do(env: &mut Env, args: Vec<MalType>) -> MalType {
 fn mal_if(env: &mut Env, args: Vec<MalType>) -> MalType {
     if args.len() == 2 {
         match eval_ast(args.get(0).unwrap().clone(), env) {
-            MalType::False | MalType::Null => MalType::Null,
+            MalType::False | MalType::Nil => MalType::Nil,
             _ => eval_ast(args.get(1).unwrap().clone(), env)
         }
     } else if args.len() == 3 {
         match eval_ast(args.get(0).unwrap().clone(), env) {
-            MalType::False | MalType::Null => eval_ast(args.get(2).unwrap().clone(), env),
+            MalType::False | MalType::Nil => eval_ast(args.get(2).unwrap().clone(), env),
             _ => eval_ast(args.get(1).unwrap().clone(), env)
         }
     } else {

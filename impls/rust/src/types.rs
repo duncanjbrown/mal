@@ -15,7 +15,7 @@ pub enum MalType {
     True,
     False,
     ParseError(String),
-    Null
+    Nil
 }
 
 impl fmt::Debug for MalType {
@@ -32,7 +32,7 @@ impl fmt::Debug for MalType {
             MalType::True  => true.fmt(f),
             MalType::False  => false.fmt(f),
             MalType::ParseError(x)  => x.fmt(f),
-            MalType::Null  => "nil".fmt(f)
+            MalType::Nil  => "nil".fmt(f)
         }
     }
 }

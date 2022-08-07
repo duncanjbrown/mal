@@ -9,7 +9,7 @@ pub fn pr_str(expr: &MalType) -> String {
         MalType::BuiltIn(_) => "<# BuiltIn>".to_string(),
         MalType::True => "true".to_string(),
         MalType::False => "false".to_string(),
-        MalType::Null => "nil".to_string(),
+        MalType::Nil => "nil".to_string(),
         MalType::ParseError(s) => s.to_string(),
         MalType::List { contents } => {
             let printed_contents: Vec<_> = contents

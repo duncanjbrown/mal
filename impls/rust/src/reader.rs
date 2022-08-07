@@ -34,13 +34,13 @@ fn read_atom(reader: &Reader) -> MalType {
         Some(token) => {
             parse_token(token)
         }
-        None => MalType::Null
+        None => MalType::Nil
     }
 }
 
 fn parse_token(token: String) -> MalType {
     if token == "nil" {
-        return MalType::Null;
+        return MalType::Nil;
     }
 
     if token == "true" {
@@ -119,7 +119,7 @@ fn read_form(reader: &mut Reader) -> MalType {
                 read_atom(reader)
             }
         },
-        None => MalType::Null
+        None => MalType::Nil
     }
 }
 
