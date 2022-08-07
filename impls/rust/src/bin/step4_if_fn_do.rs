@@ -141,22 +141,27 @@ fn mal_let(env: &mut Env, args: Vec<MalType>) -> MalType {
             if bindings.len() % 2 != 0 {
                 MalType::ParseError("Uneven number of forms passed to let".to_string())
             } else {
-                let mut new_env = Env::new(Some(env));
-                let iter = bindings.chunks(2);
+                let binds = Vec::<&str>::new();
+                let exprs = Vec::<MalType>::new();
 
-                let bound_env: &mut Env = iter.fold(&mut new_env, |e, chunk|
-                        match chunk {
-                            [MalType::Symbol(sym), let_expr] => {
-                                set_value(e, sym, let_expr.clone());
-                                e
+                for (i, v) in bindings.iter().enumerate() {
+                    if i % 2 == 0 {
+                        match v {
+                            MalType::Symbol(sym) => {
+                                binds.push(sym)
                             },
                             _ => {
-                                panic!("Can't let");
+                                panic!("Can’t bind to a value that is not a symbol");
                             }
                         }
-                );
+                    } else {
+                        exprs.push(v.to_owned());
+                    }
+                }
 
-                eval_ast(ast.clone(), bound_env)
+                let new_env = Env::new(Some(&env), binds, exprs);
+
+                eval_ast(ast.clone(), &mut new_env)
             }
         }
         _ => MalType::ParseError("Could not let".to_string())
@@ -186,7 +191,7 @@ fn mal_if(env: &mut Env, args: Vec<MalType>) -> MalType {
 }
 
 pub fn repl_env() -> Env<'static> {
-    let mut env = Env::new(None);
+    let mut env = Env::new(None, Vec::new(), Vec::new());
 
     env.set("+", MalType::Function(add));
     env.set("-", MalType::Function(sub));

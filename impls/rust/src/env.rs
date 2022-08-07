@@ -1,20 +1,25 @@
 use crate::types::MalType;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Env<'a> {
     pub outer: Option<&'a Env<'a>>,
-    symbols: HashMap<String, MalType>
+    symbols: HashMap<&'a str, MalType>
 }
 
 impl<'a> Env<'a> {
-    pub fn new(outer: Option<&'a Env>) -> Self {
-        let symbols: HashMap<String, MalType> = HashMap::new();
+    pub fn new(outer: Option<&'a Env>, binds: Vec<&'a str>, exprs: Vec<MalType>) -> Self {
+        let symbols: HashMap<&str, MalType> = HashMap::new();
+        let bindings_kv = binds.iter().zip(exprs.into_iter());
 
-        match outer {
+        let mut new_env = match outer {
             Some(new_outer) => Self { outer: Some(new_outer), symbols },
             None => Self { outer: None, symbols }
-        }
+        };
+
+        bindings_kv.for_each(|(bind, expr)| new_env.set(bind, expr));
+
+        new_env
     }
 
     pub fn get(&self, symbol: &str) -> Option<&MalType> {
@@ -27,8 +32,8 @@ impl<'a> Env<'a> {
         }
     }
 
-    pub fn set(&mut self, symbol: &str, value: MalType) {
-        self.symbols.insert(symbol.to_owned(), value);
+    pub fn set(&mut self, symbol: &'a str, value: MalType) {
+        self.symbols.insert(symbol, value);
     }
 
     pub fn find(&self, symbol: &str) -> Option<&Self> {
