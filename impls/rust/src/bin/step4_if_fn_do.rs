@@ -124,7 +124,7 @@ fn def(env: &mut Env, args: Vec<MalType>) -> MalType {
     }
 }
 
-fn set_value(env: &mut Env, symbol: &str, ast: MalType) -> MalType {
+fn set_value<'a>(env: &'a mut Env<'a>, symbol: &'a str, ast: MalType) -> MalType {
     let new_val = eval_ast(ast, env);
     match new_val {
         MalType::ParseError(_) => { new_val },
