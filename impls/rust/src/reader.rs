@@ -68,7 +68,7 @@ fn parse_token(token: String) -> MalType {
     }
 }
 
-fn read_list(reader: &mut Reader, bound: &str, mut list: MalType) -> Result<MalType, &'static str> {
+fn read_list<'a>(reader: &mut Reader, bound: &str, mut list: MalType) -> Result<MalType, &'a str> {
     match reader.peek() {
         Some(token) => {
             if bound == token.trim()  {
